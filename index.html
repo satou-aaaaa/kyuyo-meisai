@@ -655,7 +655,7 @@ function play() {
   $("back").onclick = home;
   document.querySelectorAll(".ch").forEach((b) => (b.onclick = () => choose(+b.dataset.j)));
   if ($("hint")) $("hint").onclick = hint;
-  if ($("quit")) $("quit").onclick = () => { if (cur && cur.done) return; finish(); };
+  if ($("quit")) $("quit").onclick = () => finish(); // 正解のあとでも降りられる（2026-11-07 CodeRabbit。endFinish は正解済みの問題を数える）
   paint();
   toTop();
 }
@@ -690,6 +690,7 @@ function choose(j) {
   document.querySelectorAll(".ch").forEach((b) => { b.disabled = true; if (P.opts[+b.dataset.j] === P.ans) { b.classList.add("ok"); b.setAttribute("aria-label", P.ans + "（正解）"); } });
   if ($("hint")) $("hint").disabled = true;
   if (r && r.mode === "e" && $("ecount")) $("ecount").textContent = `とことん ${r.res.length}問・一発 ${r.res.filter((x) => x.m === 0).length}`;
+  if (r && r.mode === "e" && $("quit")) $("quit").textContent = `ここで降りる（${r.res.length}問で終える）`;
   $("hintbox").innerHTML = ""; $("msg").className = "msg"; $("msg").textContent = "";
   $("after").innerHTML = `<div class="verdict" role="status">
     <div class="hd">✓ 正解！ ${starStr(st)}</div>

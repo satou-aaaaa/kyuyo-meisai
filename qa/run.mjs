@@ -329,6 +329,16 @@ try {
       }
       await q.context().close();
     }
+    // とことん：正解したすぐあとでも「ここで降りる」で終われる（2026-11-07 CodeRabbit。前は次の問題へ進むまで押しても何も起きなかった）
+    {
+      const q = await newPage(); await closeHow(q); await q.click("#go-e"); await q.waitForTimeout(150);
+      const ans = await q.evaluate(() => __km.cur().P.ans);
+      await q.locator(".ch", { hasText: ans }).first().click(); await q.waitForTimeout(100);
+      const lab = (await q.textContent("#quit")) || "";
+      await q.click("#quit"); await q.waitForTimeout(150);
+      check("とことん：正解したあとでも「ここで降りる」で結果へ進み、ボタンの数も答えた数になる", /1問で終える/.test(lab) && await q.locator("#eres").count() === 1, lab);
+      await q.context().close();
+    }
     // 2枚くらべの明細は、狭い画面で縦に並べて読める幅にする（食品表示よみで 2026-11-07 幅320pxで1字ずつ縦に折れた）
     {
       const q = await newPage(320); await closeHow(q); await q.click("#go-e"); await q.waitForTimeout(150);
