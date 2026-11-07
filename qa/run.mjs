@@ -176,12 +176,16 @@ try {
   await p.click("#hint");
   check("ヒント1は見るところを言う（答えは言わない）", (await p.textContent("#hintbox")).includes("💡") && await p.locator(".ch.ng").count() === 0);
   const nOpt = await p.locator(".ch").count();
-  if (nOpt > 2) { await p.click("#hint"); check("ヒント2はまちがいの選び肢を消し、2つにしぼる・ヒントは2回まで", await p.locator(".ch:not(.ng)").count() === 2 && await p.locator("#hint:disabled").count() === 1); }
+  if (nOpt > 2) { await p.click("#hint"); check("ヒント2はまちがいの選び肢を消し、2つにしぼる・ヒントは2回まで", await p.locator(".ch:not(.ng)").count() === 2 && await p.locator("#hint:disabled").count() === 1);
+    await p.evaluate(() => { const c = __km.cur(); [...document.querySelectorAll(".ch:not(:disabled)")].find((b) => c.P.opts[+b.dataset.j] !== c.P.ans).click(); });
+    await p.waitForTimeout(50);
+    check("ヒント2のあとに残ったまちがいを選ぶと、正解だけが残る（消した選び肢が戻らない。shared-workflows incidents/2026-11-07-hint-cut-comes-back.md）", await p.locator(".ch:not(:disabled)").count() === 1); }
   else check("選び肢が2つの問題は、ヒントは1回まで（しぼる段は無い）", await p.locator("#hint:disabled").count() === 1);
-  const h2 = nOpt > 2 ? 2 : 1;
+  const h2 = nOpt > 2 ? 3 : 1;
   await solve(p);
-  check("ヒントの数だけ★がへる", (await p.getAttribute(".verdict .stars", "aria-label")) === `星${h2 === 2 ? 1 : 2}つ`);
+  check("ヒントの数だけ★がへる", (await p.getAttribute(".verdict .stars", "aria-label")) === `星${h2 >= 2 ? 1 : 2}つ`);
   await p.click("#next");
+  check("次の問題へ進むと、フォーカスが問題（#q）に移る", await p.evaluate(() => document.activeElement && document.activeElement.id) === "q");
   for (let i = 2; i < 5; i++) { await solve(p); await p.click("#next"); }
   await p.waitForTimeout(150);
   const s1 = await mem(p);
